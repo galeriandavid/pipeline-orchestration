@@ -1,8 +1,7 @@
-from datetime import datetime
 import json
 from joblib import dump
 import os
-import sys
+import glob
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -50,11 +49,13 @@ def main():
     mae = mean_absolute_error(y_test, y_pred)
 
     metric_file = "/opt/airflow/model/metrics.json"
-    model_version = f"pipeline_{str(datetime.now().date())}"
+    date = os.environ.get('TRAIN_DATE')
+    model_version = f"pipeline_{date}"
 
     if os.path.isfile(metric_file):
         prev_mae = read_metrics(metric_file)["mae"]
-        if mae > prev_mae: 
+        if mae > prev_mae:
+            os.remove(glob.glob("/opt/airflow/model/pipeline*")[0])
             dump(best_pipe, f"/opt/airflow/model/{model_version}.joblib") 
             write_metrics({"mae": mae}, metric_file)
     else:

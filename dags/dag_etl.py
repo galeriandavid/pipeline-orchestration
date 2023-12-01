@@ -43,9 +43,11 @@ with DAG(
 
     )
 
+    date = "{{ ds }}"
     task_2 = BashOperator(
         task_id="train_model",
         bash_command="python /opt/airflow/src/train.py",
+        env={"TRAIN_DATE": date}
     )
     task_1 >> task_2
 
